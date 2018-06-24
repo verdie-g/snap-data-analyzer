@@ -8,21 +8,39 @@ function readJsonFile(filename) {
   return JSON.parse(json);
 }
 
-function countSnaps(snaps, snapsByUser, userField) {
-  snaps.forEach(snap => {
-    if (snapsByUser[snap[userField]] === undefined) {
-      snapsByUser[snap[userField]] = {
-        video: 0,
-        image: 0,
-        total: 0,
-      };
-    } 
-    snapsByUser[snap[userField]].total += 1;
-    if (snap['Media Type'] === 'IMAGE') {
-      snapsByUser[snap[userField]].image += 1;
+function addFields(o, fields) {
+  Object.keys(o).forEach(key => {
+    Object.keys(fields).forEach(field => {
+      if (o[key][field] === undefined) {
+        o[key][field] = fields[field];
+      }
+    });
+  });
+}
+
+function mergeObjectsKeys(a, b) {
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  const exclusiveUnionKeys = aKeys.filter(el => bKeys.indexOf(el) === -1);
+
+  exclusiveUnionKeys.forEach(key => {
+    if (a.hasOwnProperty(key)) {
+      b[key] = {};
     } else {
-      snapsByUser[snap[userField]].video += 1;
+      a[key] = {};
     }
+  });
+}
+
+function aggregateByUser(messages, messagesByUser, userField, incrementField) {
+  messages.forEach(message => {
+    if (messagesByUser[message[userField]] === undefined) {
+      messagesByUser[message[userField]] = {};
+    }
+    if (messagesByUser[message[userField]][incrementField] === undefined) {
+      messagesByUser[message[userField]][incrementField] = 0;
+    }
+    messagesByUser[message[userField]][incrementField] += 1;
   });
 }
 
@@ -30,35 +48,18 @@ function getSnaps(jsonFolder) {
   const snaps = readJsonFile(`${jsonFolder}/snap_history.json`);
 
   const snapsByUser = {};
-  countSnaps(snaps['Received Snap History'], snapsByUser, 'From');
-  countSnaps(snaps['Sent Snap History'], snapsByUser, 'To');
-
-  const snapUsers = Object.keys(snapsByUser);
-  const totalSnaps = Object.keys(snapsByUser).map(user => snapsByUser[user].total);
-
-  return { snapUsers, totalSnaps };
-}
-
-function countMessages(messages, messagesByUser, userField) {
-  messages.forEach(message => {
-    if (messagesByUser[message[userField]] === undefined) {
-      messagesByUser[message[userField]] = 0;
-    }
-    messagesByUser[message[userField]] += 1;
-  });
+  aggregateByUser(snaps['Received Snap History'], snapsByUser, 'From', 'received');
+  aggregateByUser(snaps['Sent Snap History'], snapsByUser, 'To', 'sent');
+  return snapsByUser;
 }
 
 function getMessages(jsonFolder) {
   const chat = readJsonFile(`${jsonFolder}/chat_history.json`);
 
   const messagesByUser = {};
-  countMessages(chat['Received Chat History'], messagesByUser, 'From');
-  countMessages(chat['Sent Chat History'], messagesByUser, 'To');
-
-  const chatUsers = Object.keys(messagesByUser);
-  const messagesCount = Object.keys(messagesByUser).map(user => messagesByUser[user]);
-
-  return { chatUsers, messagesCount };
+  aggregateByUser(chat['Received Chat History'], messagesByUser, 'From', 'received');
+  aggregateByUser(chat['Sent Chat History'], messagesByUser, 'To', 'sent');
+  return messagesByUser;
 }
 
 function generateStatsFile(ctx) {
@@ -74,8 +75,18 @@ if (process.argv.length <= 2) {
 }
 
 const jsonFolder = process.argv[2];
+const snapsByUser = getSnaps(jsonFolder);
+const messagesByUser = getMessages(jsonFolder);
+mergeObjectsKeys(snapsByUser, messagesByUser);
+addFields(snapsByUser, { 'sent': 0, 'received': 0 });
+addFields(messagesByUser, { 'sent': 0, 'received': 0 });
+
+const users = Object.keys(snapsByUser);
+const totalSnaps = users.map(user => snapsByUser[user].sent + snapsByUser[user].received);
+const messagesCount = users.map(user => messagesByUser[user].sent + messagesByUser[user].received);
 
 generateStatsFile({
-  ...getSnaps(jsonFolder),
-  ...getMessages(jsonFolder),
+  users: ['user1', 'user2', 'user3', 'user4', 'user5', 'user6', 'user7', 'user8', 'user9', 'user10'],
+  totalSnaps,
+  messagesCount, 
 });

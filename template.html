@@ -4,71 +4,32 @@
     <title>Snap Stats</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
   </head>
   <body>
-    <div class="container is-fluid">
-
-      <div class="tabs" id="tabs">
-        <ul>
-          <li class="is-active"><a onclick="switchTab(0)">Snaps</a></li>
-          <li><a onclick="switchTab(1)">Chat</a></li>
-        </ul>
-      </div>
-
-      <canvas id="chart"></canvas>
-    </div>
+    <canvas id="chart"></canvas>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
     <script>
-      const chartData = [
-        {
-          labels: {{{snapUsers}}},
+      const ctx = document.getElementById('chart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: {{{users}}},
           datasets: [
             {
               label: "Snaps sent/received",
               backgroundColor: 'rgb(242, 60, 87)',
               data: {{{totalSnaps}}},
             },
-          ],
-        },
-        {
-          labels: {{{chatUsers}}},
-          datasets: [
             {
               label: "Messages sent/received",
               backgroundColor: 'rgb(56, 187, 255)',
               data: {{{messagesCount}}},
             },
           ],
-        }
-      ];
-
-      const activeTabClass = 'is-active';
-      const ctx = document.getElementById('chart').getContext('2d');
-      const tabList = document.getElementById('tabs');
-      let tabIndex = 0;
-      let chart;
-
-      function switchTab(i) {
-        const tabItems = tabList.getElementsByTagName('li');
-        tabItems[tabIndex].classList.remove(activeTabClass);
-        tabItems[i].classList.add(activeTabClass);
-
-        if (chart !== undefined) {
-          chart.destroy();
-        }
-
-        chart = new Chart(ctx, {
-          type: 'bar',
-          data: chartData[i],
-          options: {}
-        });
-
-        tabIndex = i;
-      }
-
-      switchTab(tabIndex);
+        },
+        options: {},
+      });
     </script>
   </body>
 </html>
