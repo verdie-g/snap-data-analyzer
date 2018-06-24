@@ -1,5 +1,8 @@
 <!DOCTYPE HTML>
 <html>
+  <head>
+    <title>Snap Stats</title>
+  </head>
   <body>
     <canvas id="snap-chart"></canvas>
 
@@ -8,19 +11,15 @@
       const ctx = document.getElementById('snap-chart').getContext('2d');
       const chart = new Chart(ctx, {
         type: 'bar',
-
-        // The data for our dataset
         data: {
           labels: {{{users}}},
           datasets: [{
             label: "Snaps sent/received",
-            backgroundColor: 'rgb(255, 252, 0)',
-            borderColor: 'rgb(0, 0, 0)',
+            backgroundColor: 'rgb(242, 60, 87)',
+            borderColor: 'rgb(242, 60, 87)',
             data: {{{totalSnaps}}},
           }]
         },
-
-        // Configuration options go here
         options: {}
       });
     </script>
