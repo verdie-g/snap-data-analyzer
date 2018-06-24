@@ -86,7 +86,7 @@ const totalSnaps = users.map(user => snapsByUser[user].sent + snapsByUser[user].
 const messagesCount = users.map(user => messagesByUser[user].sent + messagesByUser[user].received);
 
 generateStatsFile({
-  users: ['user1', 'user2', 'user3', 'user4', 'user5', 'user6', 'user7', 'user8', 'user9', 'user10'],
+  users,
   totalSnaps,
   messagesCount, 
 });
