@@ -9,8 +9,8 @@ function readJsonFile(filename) {
 }
 
 function addFields(o, fields) {
-  Object.keys(o).forEach(key => {
-    Object.keys(fields).forEach(field => {
+  Object.keys(o).forEach((key) => {
+    Object.keys(fields).forEach((field) => {
       if (o[key][field] === undefined) {
         o[key][field] = fields[field];
       }
@@ -23,7 +23,7 @@ function mergeObjectsKeys(a, b) {
   const bKeys = Object.keys(b);
   const exclusiveUnionKeys = aKeys.filter(el => bKeys.indexOf(el) === -1);
 
-  exclusiveUnionKeys.forEach(key => {
+  exclusiveUnionKeys.forEach((key) => {
     if (a.hasOwnProperty(key)) {
       b[key] = {};
     } else {
@@ -33,7 +33,7 @@ function mergeObjectsKeys(a, b) {
 }
 
 function aggregateByUser(messages, messagesByUser, userField, incrementField) {
-  messages.forEach(message => {
+  messages.forEach((message) => {
     if (messagesByUser[message[userField]] === undefined) {
       messagesByUser[message[userField]] = {};
     }
@@ -64,13 +64,13 @@ function getMessages(jsonFolder) {
 
 function generateStatsFile(ctx) {
   const template = fs.readFileSync(templateName).toString();
-  Object.keys(ctx).forEach(key => { ctx[key] = JSON.stringify(ctx[key]) });
+  Object.keys(ctx).forEach((key) => { ctx[key] = JSON.stringify(ctx[key]); });
   const rendered = mustache.render(template, ctx);
   fs.writeFileSync('index.html', rendered);
 }
 
 if (process.argv.length <= 2) {
-  console.error(`usage: node snap_graph.js {json_folder}`);
+  console.error('usage: node snap_graph.js {json_folder}');
   process.exit(1);
 }
 
@@ -78,8 +78,8 @@ const jsonFolder = process.argv[2];
 const snapsByUser = getSnaps(jsonFolder);
 const messagesByUser = getMessages(jsonFolder);
 mergeObjectsKeys(snapsByUser, messagesByUser);
-addFields(snapsByUser, { 'sent': 0, 'received': 0 });
-addFields(messagesByUser, { 'sent': 0, 'received': 0 });
+addFields(snapsByUser, { sent: 0, received: 0 });
+addFields(messagesByUser, { sent: 0, received: 0 });
 
 const users = Object.keys(snapsByUser);
 const totalSnaps = users.map(user => snapsByUser[user].sent + snapsByUser[user].received);
@@ -88,5 +88,5 @@ const messagesCount = users.map(user => messagesByUser[user].sent + messagesByUs
 generateStatsFile({
   users,
   totalSnaps,
-  messagesCount, 
+  messagesCount,
 });
