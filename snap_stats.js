@@ -62,6 +62,17 @@ function getMessages(jsonFolder) {
   return messagesByUser;
 }
 
+function mapUsersToNames(jsonFolder) {
+  const friends = readJsonFile(`${jsonFolder}/friends.json`);
+
+  return friends.Friends
+    .filter(f => f['Display Name'] !== '')
+    .reduce((nameByUser, f) => {
+      nameByUser[f.Username] = f['Display Name'];
+      return nameByUser;
+    }, {});
+}
+
 function generateStatsFile(ctx) {
   const template = fs.readFileSync(templateName).toString();
   Object.keys(ctx).forEach((key) => { ctx[key] = JSON.stringify(ctx[key]); });
@@ -77,6 +88,7 @@ if (process.argv.length <= 2) {
 const jsonFolder = process.argv[2];
 const snapsByUser = getSnaps(jsonFolder);
 const messagesByUser = getMessages(jsonFolder);
+const nameByUser = mapUsersToNames(jsonFolder);
 mergeObjectsKeys(snapsByUser, messagesByUser);
 addFields(snapsByUser, { sent: 0, received: 0 });
 addFields(messagesByUser, { sent: 0, received: 0 });
@@ -84,9 +96,15 @@ addFields(messagesByUser, { sent: 0, received: 0 });
 const users = Object.keys(snapsByUser);
 const totalSnaps = users.map(user => snapsByUser[user].sent + snapsByUser[user].received);
 const messagesCount = users.map(user => messagesByUser[user].sent + messagesByUser[user].received);
+const names = users.map((u) => {
+  if (u in nameByUser) {
+    return nameByUser[u];
+  }
+  return u;
+});
 
 generateStatsFile({
-  users,
+  users: names,
   totalSnaps,
   messagesCount,
 });
