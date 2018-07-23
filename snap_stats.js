@@ -56,9 +56,14 @@ function getSnaps(jsonFolder) {
 function getMessages(jsonFolder) {
   const chat = readJsonFile(`${jsonFolder}/chat_history.json`);
 
+  // Empty media type must be a snap opening
+  const isText = c => c['Media Type'] !== '';
+  const received = chat['Received Chat History'].filter(isText);
+  const sent = chat['Sent Chat History'].filter(isText);
+
   const messagesByUser = {};
-  aggregateByUser(chat['Received Chat History'], messagesByUser, 'From', 'received');
-  aggregateByUser(chat['Sent Chat History'], messagesByUser, 'To', 'sent');
+  aggregateByUser(received, messagesByUser, 'From', 'received');
+  aggregateByUser(sent, messagesByUser, 'To', 'sent');
   return messagesByUser;
 }
 
