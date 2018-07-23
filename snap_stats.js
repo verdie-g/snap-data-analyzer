@@ -101,12 +101,7 @@ addFields(messagesByUser, { sent: 0, received: 0 });
 const users = Object.keys(snapsByUser);
 const totalSnaps = users.map(user => snapsByUser[user].sent + snapsByUser[user].received);
 const messagesCount = users.map(user => messagesByUser[user].sent + messagesByUser[user].received);
-const names = users.map((u) => {
-  if (u in nameByUser) {
-    return nameByUser[u];
-  }
-  return u;
-});
+const names = users.map(u => nameByUser[u] || u);
 
 generateStatsFile({
   users: names,
