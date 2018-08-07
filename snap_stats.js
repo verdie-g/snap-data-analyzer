@@ -20,8 +20,7 @@ function addFields(o, fields) {
 
 function mergeObjectsKeys(a, b) {
   const aKeys = Object.keys(a);
-  const bKeys = Object.keys(b);
-  const exclusiveUnionKeys = aKeys.filter(el => bKeys.indexOf(el) === -1);
+  const exclusiveUnionKeys = aKeys.filter(aKey => !(aKey in b));
 
   exclusiveUnionKeys.forEach((key) => {
     if (a.hasOwnProperty(key)) {
