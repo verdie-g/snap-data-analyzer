@@ -19,16 +19,16 @@ function addFields(o, fields) {
 }
 
 function mergeObjectsKeys(a, b) {
-  const aKeys = Object.keys(a);
-  const exclusiveUnionKeys = aKeys.filter(aKey => !(aKey in b));
+  const shareObjectKeys = (from, to) => {
+    Object.keys(from)
+      .filter(key => !(key in to))
+      .forEach((key) => {
+        to[key] = {};
+      });
+  };
 
-  exclusiveUnionKeys.forEach((key) => {
-    if (a.hasOwnProperty(key)) {
-      b[key] = {};
-    } else {
-      a[key] = {};
-    }
-  });
+  shareObjectKeys(a, b);
+  shareObjectKeys(b, a);
 }
 
 function aggregateByUser(messages, messagesByUser, userField, incrementField) {
