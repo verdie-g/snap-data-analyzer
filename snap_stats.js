@@ -10,11 +10,11 @@ function readJsonFile(filename) {
 
 function addFields(o, fields) {
   Object.keys(o).forEach((key) => {
-    Object.keys(fields).forEach((field) => {
-      if (o[key][field] === undefined) {
-        o[key][field] = fields[field];
-      }
-    });
+    Object.entries(fields)
+      .filter(([field]) => !(field in o[key]))
+      .forEach(([field, defaultValue]) => {
+        o[key][field] = defaultValue;
+      });
   });
 }
 
