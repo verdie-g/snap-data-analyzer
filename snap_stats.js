@@ -55,8 +55,8 @@ function getSnaps(jsonFolder) {
 function getMessages(jsonFolder) {
   const chat = readJsonFile(`${jsonFolder}/chat_history.json`);
 
-  // Empty media type must be a snap opening
-  const isText = c => c['Media Type'] !== '';
+  // Media Type can be TEXT, VIDEO, "" (IMAGE OR SNAP OPENING ?)
+  const isText = c => c['Media Type'] === 'TEXT';
   const received = chat['Received Chat History'].filter(isText);
   const sent = chat['Sent Chat History'].filter(isText);
 
