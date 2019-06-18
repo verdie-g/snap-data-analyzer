@@ -2,6 +2,7 @@ const fs = require('fs');
 const mustache = require('mustache');
 
 const templateName = 'template.html';
+const removeEmptyUsers = true;
 
 function readJsonFile(filename) {
   const json = fs.readFileSync(filename).toString();
@@ -97,10 +98,19 @@ mergeObjectsKeys(snapsByUser, messagesByUser);
 addFields(snapsByUser, { sent: 0, received: 0 });
 addFields(messagesByUser, { sent: 0, received: 0 });
 
-const users = Object.keys(snapsByUser);
-const totalSnaps = users.map(user => snapsByUser[user].sent + snapsByUser[user].received);
-const messagesCount = users.map(user => messagesByUser[user].sent + messagesByUser[user].received);
-const names = users.map(u => nameByUser[u] || u);
+var users = Object.keys(snapsByUser);
+var totalSnaps = users.map(user => snapsByUser[user].sent + snapsByUser[user].received);
+var messagesCount = users.map(user => messagesByUser[user].sent + messagesByUser[user].received);
+var names = users.map(u => nameByUser[u] || u);
+
+if (removeEmptyUsers) {
+  // only counts snaps as chat_history data is polluted with stories
+  // simply add (messagesByUser[user].sent + messagesByUser[user].received) to count messages also
+  var contactedUsers = users.filter(user => (snapsByUser[user].sent + snapsByUser[user].received) > 0);
+  totalSnaps = contactedUsers.map(user => snapsByUser[user].sent + snapsByUser[user].received);
+  messagesCount = contactedUsers.map(user => messagesByUser[user].sent + messagesByUser[user].received);
+  names = contactedUsers.map(u => nameByUser[u] || u);
+}
 
 generateStatsFile({
   users: names,
